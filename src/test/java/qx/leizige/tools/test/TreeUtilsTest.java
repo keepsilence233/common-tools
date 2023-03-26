@@ -21,8 +21,8 @@ public class TreeUtilsTest {
     @Before
     public void before() {
         menuList = Lists.newArrayListWithExpectedSize(5);
-        menuList.add(new Menu(1, null, "节点1"));
-        menuList.add(new Menu(2, null, "节点2"));
+        menuList.add(new Menu(1, 0, "节点1"));
+        menuList.add(new Menu(2, 0, "节点2"));
         menuList.add(new Menu(3, 1, "节点1.1"));
         menuList.add(new Menu(4, 1, "节点1.2"));
         menuList.add(new Menu(5, 3, "节点1.1.1"));
@@ -30,7 +30,7 @@ public class TreeUtilsTest {
 
     @Test
     public void test() {
-        Collection<Menu> menus = TreeUtils.toTree(menuList, Menu.class);
+        Collection<Menu> menus = TreeUtils.toTree(menuList, Menu.class, (v) -> v.equals(0));
         System.out.println(JSONUtil.toJsonPrettyStr(menus));
     }
 

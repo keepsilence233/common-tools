@@ -1,12 +1,12 @@
 package qx.leizige.common;
 
-import org.apache.commons.lang3.StringUtils;
 import qx.leizige.common.annotations.Children;
 import qx.leizige.common.annotations.MenuId;
 import qx.leizige.common.annotations.ParentId;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * 基于反射的通用树形结构工具类
@@ -18,9 +18,10 @@ public class TreeUtils {
      *
      * @param collection 目标集合
      * @param clazz      集合元素类型
+     * @param isRootNode 判断是否是根节点
      * @return 转换后的树形结构
      */
-    public static <T> Collection<T> toTree(Collection<T> collection, Class<T> clazz) {
+    public static <T> Collection<T> toTree(Collection<T> collection, Class<T> clazz, Predicate<Object> isRootNode) {
         Field id = Arrays.stream(clazz.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(MenuId.class)).findFirst()
                 .orElseThrow(() -> new RuntimeException("There is no field identifying the annotation [@MenuId]"));
@@ -30,7 +31,7 @@ public class TreeUtils {
         Field children = Arrays.stream(clazz.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(Children.class)).findFirst()
                 .orElseThrow(() -> new RuntimeException("There is no field identifying the annotation [@Children]"));
-        return toTree(collection, id.getName(), parent.getName(), children.getName(), clazz);
+        return toTree(collection, id.getName(), parent.getName(), children.getName(), clazz, isRootNode);
     }
 
     /**
@@ -41,9 +42,12 @@ public class TreeUtils {
      * @param parent     父节点编号字段名称
      * @param children   子节点集合属性名称
      * @param clazz      集合元素类型
+     * @param isRootNode 判断是否是根节点
      * @return 转换后的树形结构
      */
-    public static <T> Collection<T> toTree(Collection<T> collection, String id, String parent, String children, Class<T> clazz) {
+    public static <T> Collection<T> toTree(Collection<T> collection,
+                                           String id, String parent, String children,
+                                           Class<T> clazz, Predicate<Object> isRootNode) {
         try {
             if (collection == null || collection.isEmpty()) return Collections.emptyList();// 如果目标集合为空,直接返回一个空树
 
@@ -87,7 +91,7 @@ public class TreeUtils {
             // 找出所有的根节点
             for (T c : collection) {
                 Object parentId = parentField.get(c);
-                if (isRootNode(parentId)) {
+                if (isRootNode.test(parentId)) {
                     roots.add(c);
                 }
             }
@@ -128,7 +132,9 @@ public class TreeUtils {
         if (children == null) {
             if (collection.getClass().isAssignableFrom(Set.class)) {
                 children = new HashSet<>();
-            } else children = new ArrayList<>();
+            } else {
+                children = new ArrayList<>();
+            }
         }
 
         for (T t : collection) {
@@ -142,23 +148,5 @@ public class TreeUtils {
                 addChild(t, collection, idField, parentField, childrenField);
             }
         }
-    }
-
-    /**
-     * 判断是否是根节点, 判断方式为: 父节点编号为空或为 0, 则认为是根节点. 此处的判断应根据自己的业务数据而定.
-     *
-     * @param parentId 父节点编号
-     * @return 是否是根节点
-     */
-    private static boolean isRootNode(Object parentId) {
-        boolean flag = false;
-        if (parentId == null) {
-            flag = true;
-        } else if (parentId instanceof String && (StringUtils.isEmpty((String) parentId) || parentId.equals("0"))) {
-            flag = true;
-        } else if (parentId instanceof Integer && Integer.valueOf(0).equals(parentId)) {
-            flag = true;
-        }
-        return flag;
     }
 }
