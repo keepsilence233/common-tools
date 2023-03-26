@@ -1,4 +1,4 @@
-package qx.leizige;
+package qx.leizige.common;
 
 import java.util.BitSet;
 import java.util.stream.Stream;

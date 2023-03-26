@@ -1,4 +1,4 @@
-package qx.leizige;
+package qx.leizige.common;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

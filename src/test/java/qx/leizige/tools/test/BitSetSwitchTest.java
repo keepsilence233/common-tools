@@ -2,9 +2,9 @@ package qx.leizige.tools.test;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import qx.leizige.BitSetSwitch;
-import qx.leizige.Switch;
-import qx.leizige.SwitchDef;
+import qx.leizige.common.BitSetSwitch;
+import qx.leizige.common.Switch;
+import qx.leizige.common.SwitchDef;
 
 @Slf4j
 public class BitSetSwitchTest {
